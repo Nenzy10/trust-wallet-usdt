@@ -45,28 +45,35 @@
         <button id="send-usdt" disabled>Send USDT</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.6.6/dist/umd/index.min.js"></script>
+    <!-- Include WalletConnect 2.0 library -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/client@2.0.0-beta.2/dist/umd/index.min.js"></script>
     <script>
-        // Create the WalletConnect provider
-        const provider = new WalletConnectProvider.default({
+        // Create WalletConnect provider (version 2.0)
+        const provider = new WalletConnectClient.Client({
+            chainId: 1, // Mainnet (TRON)
             rpc: {
                 1: "https://api.trongrid.io" // TRON Mainnet RPC URL
             },
-            qrcode: true // Enable QR Code for WalletConnect
         });
 
         // Listen for "Connect Wallet" button click
         document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
             if (!provider.connected) {
-                // Enable WalletConnect (opens Trust Wallet app or shows QR code)
-                await provider.enable();
-                const accounts = await provider.request({ method: 'eth_accounts' });
-                const address = accounts[0];
-                document.getElementById('status').textContent = `Connected: ${address}`;
+                try {
+                    // Enable WalletConnect (opens Trust Wallet app or shows QR code)
+                    await provider.connect();
 
-                // Simulate a balance of 1B USDT
-                document.getElementById('balance').textContent = 'USDT Balance: 1,000,000,000 USDT';
-                document.getElementById('send-usdt').disabled = false;
+                    const accounts = await provider.getAccounts();
+                    const address = accounts[0];
+                    document.getElementById('status').textContent = `Connected: ${address}`;
+
+                    // Simulate a balance of 1B USDT
+                    document.getElementById('balance').textContent = 'USDT Balance: 1,000,000,000 USDT';
+                    document.getElementById('send-usdt').disabled = false;
+                } catch (error) {
+                    console.error("Error connecting wallet:", error);
+                    alert("Failed to connect wallet.");
+                }
             } else {
                 alert('Already connected to Trust Wallet');
             }
