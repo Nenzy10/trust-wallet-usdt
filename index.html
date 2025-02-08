@@ -3,46 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust Wallet USDT</title>
+    <title>Trust Wallet dApp</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.0.3/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/@walletconnect/web3-provider/1.7.8/web3-provider.min.js"></script>
 </head>
 <body>
-    <h2>Trust Wallet USDT (Off-Chain)</h2>
-    <label>Enter Wallet Address:</label>
-    <input type="text" id="walletAddress" placeholder="Enter your Trust Wallet address">
-    <button onclick="checkBalance()">Check Balance</button>
-    <p id="balanceDisplay">Balance: 0 USDT</p>
 
-    <h3>Send USDT</h3>
-    <label>Receiver Address:</label>
-    <input type="text" id="receiverAddress" placeholder="Enter receiver's Trust Wallet address">
-    <label>Amount:</label>
-    <input type="number" id="amount" placeholder="Amount">
-    <button onclick="sendUSDT()">Send</button>
-    <p id="sendStatus"></p>
+    <h1>Trust Wallet Connection</h1>
+    
+    <!-- Connect Button -->
+    <button id="connectButton">Connect Wallet</button>
+    
+    <!-- Display Wallet Address -->
+    <p id="walletAddress">Not Connected</p>
 
     <script>
-        async function checkBalance() {
-            let wallet = document.getElementById("walletAddress").value;
-            let response = await fetch(`http://localhost:3000/balance/${wallet}`);
-            let data = await response.json();
-            document.getElementById("balanceDisplay").innerText = `Balance: ${data.balance} USDT`;
+        const connectButton = document.getElementById("connectButton");
+        const walletAddressDisplay = document.getElementById("walletAddress");
+
+        async function connectWallet() {
+            try {
+                // Create WalletConnect provider
+                const provider = new WalletConnectProvider.default({
+                    rpc: {
+                        1: "https://mainnet.infura.io/v3/YOUR_INFURA_API_KEY" // Replace with your RPC URL
+                    }
+                });
+
+                // Enable the provider (open QR code scanner)
+                await provider.enable();
+
+                // Create Web3 instance
+                const web3 = new Web3(provider);
+
+                // Get connected accounts
+                const accounts = await web3.eth.getAccounts();
+                const walletAddress = accounts[0];
+
+                // Display the wallet address
+                walletAddressDisplay.textContent = `Connected: ${walletAddress}`;
+
+            } catch (error) {
+                console.error("Wallet connection failed:", error);
+                alert("Failed to connect wallet. Try again.");
+            }
         }
 
-        async function sendUSDT() {
-            let sender = document.getElementById("walletAddress").value;
-            let receiver = document.getElementById("receiverAddress").value;
-            let amount = parseInt(document.getElementById("amount").value);
-
-            let response = await fetch("http://localhost:3000/send", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sender, receiver, amount })
-            });
-
-            let data = await response.json();
-            document.getElementById("sendStatus").innerText = data.message;
-            checkBalance();
-        }
+        // Attach event listener to button
+        connectButton.addEventListener("click", connectWallet);
     </script>
+
 </body>
 </html>
