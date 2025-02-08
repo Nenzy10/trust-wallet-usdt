@@ -44,49 +44,78 @@
         <button id="send-usdt" disabled>Send USDT</button>
     </div>
 
-    <!-- WalletConnect Library (Version 2.x) -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/client@2.0.0-beta.2/dist/umd/index.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
     <script>
-        // Initialize WalletConnect provider (TRON RPC endpoint)
-        const provider = new WalletConnectClient.Client({
-            chainId: 1, // TRON Mainnet
-            rpc: {
-                1: "https://api.trongrid.io" // TRON Mainnet RPC URL
-            }
-        });
+        // Set up the Alchemy RPC URL with your API key
+        const alchemyUrl = "https://eth-mainnet.g.alchemy.com/v2/IQRdvsH1pd-PnHO_wJ3wfbqKRTfffsjc";
+        const provider = new ethers.JsonRpcProvider(alchemyUrl);
 
-        // Connect Wallet button
-        document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
-            if (!provider.connected) {
+        const usdtAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // USDT contract address on Ethereum
+        const usdtAbi = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function transfer(address recipient, uint256 amount) public returns (bool)"
+        ];
+
+        let signer;
+        let userAddress;
+        let usdtContract;
+
+        // Simulated balance (for demonstration purposes)
+        const simulatedBalance = ethers.utils.parseUnits("1000000000", 6); // Simulate 1 billion USDT
+
+        // Initialize the contract
+        const connectWallet = async () => {
+            if (typeof window.ethereum !== "undefined") {
+                const ethereum = window.ethereum;
                 try {
-                    // Connect Wallet
-                    await provider.connect();
+                    // Request wallet connection
+                    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                    userAddress = accounts[0];
 
-                    // Get the connected wallet's address
-                    const accounts = await provider.getAccounts();
-                    const address = accounts[0];
+                    // Create the signer and contract instance
+                    signer = new ethers.Wallet(userAddress, provider);
+                    usdtContract = new ethers.Contract(usdtAddress, usdtAbi, signer);
 
-                    // Display the wallet address (for debugging purposes)
-                    document.getElementById('status').textContent = `Connected: ${address}`;
+                    // Get the balance of USDT (real balance from the blockchain)
+                    const realBalance = await usdtContract.balanceOf(userAddress);
+                    const realBalanceInEther = ethers.utils.formatUnits(realBalance, 6); // USDT has 6 decimals
 
-                    // Simulate a balance of 1B USDT
-                    document.getElementById('balance').textContent = 'USDT Balance: 1,000,000,000 USDT';
-                    document.getElementById('send-usdt').disabled = false;
-                } catch (error) {
-                    console.error("Connection failed:", error);
+                    // Display the simulated balance (this overrides the real balance for UI)
+                    const balanceInEther = ethers.utils.formatUnits(simulatedBalance, 6); // Simulate 1B USDT
+                    document.getElementById("balance").innerText = `USDT Balance: ${balanceInEther} USDT`;
+
+                    document.getElementById("status").innerText = `Connected: ${userAddress}`;
+                    document.getElementById("send-usdt").disabled = false;
+                } catch (err) {
+                    console.error("Connection failed:", err);
                     alert("Failed to connect wallet.");
                 }
             } else {
-                alert('Already connected to Trust Wallet');
+                alert("Please install MetaMask or Trust Wallet to use this dApp.");
             }
-        });
+        };
 
-        // Simulate sending USDT (no actual blockchain transaction)
-        document.getElementById('send-usdt').addEventListener('click', () => {
-            alert('USDT sent to another Trust Wallet address!');
-        });
+        // Send USDT (simulate the transfer, only for the UI)
+        const sendUsdt = async () => {
+            const recipientAddress = prompt("Enter recipient address:");
+            const amount = prompt("Enter amount to send (in USDT):");
+            const amountInUnits = ethers.utils.parseUnits(amount, 6); // Convert amount to smallest units (6 decimals)
+
+            try {
+                // Send the USDT transaction (real blockchain interaction)
+                const tx = await usdtContract.transfer(recipientAddress, amountInUnits);
+                await tx.wait(); // Wait for transaction confirmation
+                alert("Transaction successful!");
+                window.location.reload(); // Reload to update the balance
+            } catch (err) {
+                console.error("Error sending USDT:", err);
+                alert("Failed to send USDT.");
+            }
+        };
+
+        // Event listeners
+        document.getElementById("connect-wallet-btn").addEventListener("click", connectWallet);
+        document.getElementById("send-usdt").addEventListener("click", sendUsdt);
     </script>
 </body>
 </html>
-
