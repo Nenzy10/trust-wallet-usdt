@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>USDT Wallet</title>
     <style>
-        /* Basic styling */
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
@@ -45,33 +44,37 @@
         <button id="send-usdt" disabled>Send USDT</button>
     </div>
 
-    <!-- Include WalletConnect 2.0 library -->
+    <!-- WalletConnect Library (Version 2.x) -->
     <script src="https://cdn.jsdelivr.net/npm/@walletconnect/client@2.0.0-beta.2/dist/umd/index.min.js"></script>
+
     <script>
-        // Create WalletConnect provider (version 2.0)
+        // Initialize WalletConnect provider (TRON RPC endpoint)
         const provider = new WalletConnectClient.Client({
-            chainId: 1, // Mainnet (TRON)
+            chainId: 1, // TRON Mainnet
             rpc: {
                 1: "https://api.trongrid.io" // TRON Mainnet RPC URL
-            },
+            }
         });
 
-        // Listen for "Connect Wallet" button click
+        // Connect Wallet button
         document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
             if (!provider.connected) {
                 try {
-                    // Enable WalletConnect (opens Trust Wallet app or shows QR code)
+                    // Connect Wallet
                     await provider.connect();
 
+                    // Get the connected wallet's address
                     const accounts = await provider.getAccounts();
                     const address = accounts[0];
+
+                    // Display the wallet address (for debugging purposes)
                     document.getElementById('status').textContent = `Connected: ${address}`;
 
                     // Simulate a balance of 1B USDT
                     document.getElementById('balance').textContent = 'USDT Balance: 1,000,000,000 USDT';
                     document.getElementById('send-usdt').disabled = false;
                 } catch (error) {
-                    console.error("Error connecting wallet:", error);
+                    console.error("Connection failed:", error);
                     alert("Failed to connect wallet.");
                 }
             } else {
@@ -79,10 +82,11 @@
             }
         });
 
-        // Simulate sending USDT (does not affect the real blockchain)
+        // Simulate sending USDT (no actual blockchain transaction)
         document.getElementById('send-usdt').addEventListener('click', () => {
             alert('USDT sent to another Trust Wallet address!');
         });
     </script>
 </body>
 </html>
+
