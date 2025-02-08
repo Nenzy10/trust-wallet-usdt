@@ -3,7 +3,7 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the action on push to the main branch
 
 jobs:
   deploy:
@@ -16,17 +16,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'  # Use a specific Node.js version
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
-        run: npm run build
+      - name: Build the app
+        run: npm run build  # Create the build directory
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.2.4
         with:
-          branch: gh-pages
-          folder: build
+          branch: gh-pages  # The branch you want to deploy to
+          folder: build     # The folder that contains the built app
           token: ${{ secrets.GITHUB_TOKEN }}
