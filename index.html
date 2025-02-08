@@ -33,18 +33,23 @@
             margin: 20px 0;
             font-size: 18px;
         }
+        #qr-code-container {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>USDT Wallet</h2>
         <button id="connect-wallet-btn">Connect Wallet</button>
+        <div id="qr-code-container"></div>
         <p id="status">Not Connected</p>
         <p id="balance">USDT Balance: 0 USDT</p>
         <button id="send-usdt" disabled>Send USDT</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/client@2.0.0-beta.8/dist/umd/index.min.js"></script>
     <script>
         // Set up the Alchemy RPC URL with your API key
         const alchemyUrl = "https://eth-mainnet.g.alchemy.com/v2/IQRdvsH1pd-PnHO_wJ3wfbqKRTfffsjc";
@@ -63,36 +68,45 @@
         // Simulated balance (for demonstration purposes)
         const simulatedBalance = ethers.utils.parseUnits("1000000000", 6); // Simulate 1 billion USDT
 
-        // Initialize the contract
+        let walletConnectProvider;
+        let walletConnectSession;
+
+        // Initialize the WalletConnect provider
         const connectWallet = async () => {
-            if (typeof window.ethereum !== "undefined") {
-                const ethereum = window.ethereum;
-                try {
-                    // Request wallet connection
-                    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-                    userAddress = accounts[0];
+            // Initialize WalletConnect
+            walletConnectProvider = new WalletConnectProvider.default({
+                rpc: {
+                    1: alchemyUrl, // Mainnet (Ethereum)
+                },
+                chainId: 1, // Ethereum Mainnet
+            });
 
-                    // Create the signer and contract instance
-                    signer = new ethers.Wallet(userAddress, provider);
-                    usdtContract = new ethers.Contract(usdtAddress, usdtAbi, signer);
-
-                    // Get the balance of USDT (real balance from the blockchain)
-                    const realBalance = await usdtContract.balanceOf(userAddress);
-                    const realBalanceInEther = ethers.utils.formatUnits(realBalance, 6); // USDT has 6 decimals
-
-                    // Display the simulated balance (this overrides the real balance for UI)
-                    const balanceInEther = ethers.utils.formatUnits(simulatedBalance, 6); // Simulate 1B USDT
-                    document.getElementById("balance").innerText = `USDT Balance: ${balanceInEther} USDT`;
-
-                    document.getElementById("status").innerText = `Connected: ${userAddress}`;
-                    document.getElementById("send-usdt").disabled = false;
-                } catch (err) {
-                    console.error("Connection failed:", err);
-                    alert("Failed to connect wallet.");
-                }
-            } else {
-                alert("Please install MetaMask or Trust Wallet to use this dApp.");
+            // Check if the provider is connected
+            if (!walletConnectProvider.connected) {
+                // Create a new session (which will prompt the QR code)
+                await walletConnectProvider.enable();
+                walletConnectSession = walletConnectProvider.session;
+                
+                // Create QR code for WalletConnect connection
+                const qrCodeUrl = walletConnectProvider.connector.uri;
+                new QRCode(document.getElementById("qr-code-container"), qrCodeUrl);
             }
+
+            // Set up signer and contract
+            signer = new ethers.Wallet(walletConnectProvider.accounts[0], provider);
+            userAddress = walletConnectProvider.accounts[0];
+            usdtContract = new ethers.Contract(usdtAddress, usdtAbi, signer);
+
+            // Get the real balance of USDT
+            const realBalance = await usdtContract.balanceOf(userAddress);
+            const realBalanceInEther = ethers.utils.formatUnits(realBalance, 6); // USDT has 6 decimals
+
+            // Display the simulated balance (this overrides the real balance for UI)
+            const balanceInEther = ethers.utils.formatUnits(simulatedBalance, 6); // Simulate 1B USDT
+            document.getElementById("balance").innerText = `USDT Balance: ${balanceInEther} USDT`;
+
+            document.getElementById("status").innerText = `Connected: ${userAddress}`;
+            document.getElementById("send-usdt").disabled = false;
         };
 
         // Send USDT (simulate the transfer, only for the UI)
