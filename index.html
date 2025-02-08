@@ -3,64 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust Wallet - TRON Connection</title>
+    <title>Connect Trust Wallet - TRON</title>
     <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.js"></script>
     <script>
-        let tronWeb;
         let walletAddress = null;
 
-        async function connectWallet() {
-            try {
-                if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-                    // Trust Wallet or TronLink is detected
-                    tronWeb = window.tronWeb;
-                    walletAddress = tronWeb.defaultAddress.base58;
-                    document.getElementById("walletAddress").textContent = `Connected: ${walletAddress}`;
-
-                    // Fetch USDT Balance
-                    getUSDTBalance();
-                } else {
-                    alert("Trust Wallet / TronLink not detected. Open in Trust Wallet or install TronLink.");
-                }
-            } catch (error) {
-                console.error("Connection error:", error);
-                alert("Failed to connect wallet. Try again.");
-            }
-        }
-
-        async function getUSDTBalance() {
-            try {
-                if (!walletAddress) return alert("Connect wallet first!");
-
-                // USDT TRC-20 Contract on Tron Mainnet
-                const USDT_CONTRACT = "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj";
-
-                // Call TRC-20 BalanceOf function
-                const contract = await tronWeb.contract().at(USDT_CONTRACT);
-                let balance = await contract.methods.balanceOf(walletAddress).call();
-                
-                // Convert to readable format (USDT has 6 decimals)
-                balance = tronWeb.toDecimal(balance) / 1_000_000;
-
-                document.getElementById("usdtBalance").textContent = `USDT Balance: ${balance} USDT`;
-            } catch (error) {
-                console.error("Failed to fetch USDT balance:", error);
-            }
+        function connectWallet() {
+            // Open Trust Wallet App using deep link
+            window.location.href = "trust://";
         }
     </script>
 </head>
 <body>
 
-    <h1>Trust Wallet - TRON Connection</h1>
+    <h1>Connect Trust Wallet - TRON</h1>
     
     <!-- Connect Wallet Button -->
-    <button onclick="connectWallet()">Connect Wallet</button>
+    <button onclick="connectWallet()">Connect Trust Wallet</button>
     
     <!-- Wallet Address Display -->
     <p id="walletAddress">Not Connected</p>
-
-    <!-- USDT Balance Display -->
-    <p id="usdtBalance">USDT Balance: --</p>
 
 </body>
 </html>
