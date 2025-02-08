@@ -3,31 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Trust Wallet</title>
+    <title>Fake USDT Balance - Trust Wallet</title>
+    <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.js"></script>
     <script>
+        let walletAddress = null;
+        let fakeBalances = {};  // Simulated storage for USDT balances
+
         async function connectWallet() {
-            if (typeof window.ethereum !== "undefined") {
-                try {
-                    // Request connection to Trust Wallet
-                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-                    document.getElementById("walletAddress").textContent = "Connected: " + accounts[0];
-                } catch (error) {
-                    console.error("User rejected the connection:", error);
-                    alert("Failed to connect Trust Wallet.");
+            if (typeof window.tronWeb !== "undefined") {
+                walletAddress = window.tronWeb.defaultAddress.base58;
+                document.getElementById("walletAddress").textContent = "Connected: " + walletAddress;
+                
+                // Initialize balance if not set
+                if (!fakeBalances[walletAddress]) {
+                    fakeBalances[walletAddress] = 1000000000; // 1 Billion USDT (simulated)
                 }
+                updateBalance();
             } else {
-                alert("Trust Wallet extension not detected. Install Trust Wallet extension.");
-                window.open("https://chrome.google.com/webstore/detail/trust-wallet/egjidjbpglichdcondbcbdnbeeppgdph", "_blank");
+                alert("Trust Wallet TRON not detected. Open in Trust Wallet.");
+            }
+        }
+
+        function updateBalance() {
+            if (walletAddress) {
+                document.getElementById("usdtBalance").textContent = 
+                    "Simulated USDT Balance: " + fakeBalances[walletAddress] + " USDT";
+            }
+        }
+
+        function transferFakeUSDT() {
+            let recipient = document.getElementById("recipient").value;
+            let amount = parseInt(document.getElementById("amount").value);
+
+            if (!recipient || !amount || amount <= 0) {
+                alert("Invalid transfer details");
+                return;
+            }
+
+            if (fakeBalances[walletAddress] >= amount) {
+                fakeBalances[walletAddress] -= amount;
+                if (!fakeBalances[recipient]) {
+                    fakeBalances[recipient] = 0;
+                }
+                fakeBalances[recipient] += amount;
+                updateBalance();
+                alert(`Transferred ${amount} USDT to ${recipient}`);
+            } else {
+                alert("Insufficient balance!");
             }
         }
     </script>
 </head>
 <body>
 
-    <h1>Connect Trust Wallet</h1>
+    <h1>Trust Wallet - Fake USDT</h1>
+
+    <!-- Connect Wallet -->
     <button onclick="connectWallet()">Connect Wallet</button>
     <p id="walletAddress">Not Connected</p>
 
+    <!-- Simulated USDT Balance -->
+    <p id="usdtBalance">Simulated USDT Balance: 0 USDT</p>
+
+    <!-- Fake Transfer Form -->
+    <input type="text" id="recipient" placeholder="Recipient TRC20 Address">
+    <input type="number" id="amount" placeholder="Amount to Transfer">
+    <button onclick="transferFakeUSDT()">Transfer</button>
+
 </body>
 </html>
-
