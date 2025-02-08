@@ -3,98 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fake USDT Wallet</title>
-    <script src="https://cdn.jsdelivr.net/npm/@trustwallet/walletconnect-provider@1.6.1/dist/umd/index.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        button {
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
-        }
-        #balance {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>Trust Wallet USDT Display</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Trust Wallet Fake USDT TRC-20</h1>
-
-    <button id="connectWallet">Connect Trust Wallet</button>
-    <p id="walletAddress">Not Connected</p>
-
-    <button id="sendTransaction" disabled>Send Fake USDT</button>
-
-    <div id="balanceContainer">
-        <p>USDT Balance (TRC-20): <span id="balance">0</span> USDT</p>
+    <h1>Trust Wallet USDT Display</h1>
+    <div id="walletBalance">
+        <p>Connected Wallet Address: <span id="walletAddress"></span></p>
+        <p>Fake USDT Balance: <span class="balance" id="fakeBalance">0 USDT</span></p>
+        <button id="connectButton">Connect Wallet</button>
     </div>
-
-    <script>
-        let wallet;
-        let provider;
-        let userBalance = 0;  // Default fake balance
-
-        // Step 1: Connect Trust Wallet using WalletConnect or Trust Wallet Extension
-        document.getElementById('connectWallet').addEventListener('click', async () => {
-            // Initialize TrustWalletProvider using WalletConnect
-            provider = new WalletConnectProvider.default({
-                rpc: {
-                    1: "https://api.trongrid.io"  // TRON RPC URL (just to connect)
-                }
-            });
-
-            try {
-                // Enable wallet connection (Trust Wallet)
-                await provider.enable();
-                wallet = provider.getSigner();
-
-                // Update the UI with wallet address
-                document.getElementById('walletAddress').textContent = `Connected: ${wallet.address}`;
-
-                // Step 2: Display the Fake USDT Balance (mirroring as 1 billion USDT)
-                // We will display the fake balance of 1 billion USDT for any connected wallet
-                userBalance = 1000000000; // 1 Billion USDT (fake balance)
-                document.getElementById('balance').textContent = userBalance;
-
-                // Enable send button
-                document.getElementById('sendTransaction').disabled = false;
-
-                console.log('Trust Wallet connected!');
-            } catch (error) {
-                console.error('Failed to connect wallet:', error);
-            }
-        });
-
-        // Step 3: Fake USDT Transaction (update balance locally)
-        document.getElementById('sendTransaction').addEventListener('click', async () => {
-            if (!wallet) {
-                console.error("Wallet is not connected!");
-                return;
-            }
-
-            // Define recipient address and the amount to send
-            const recipient = 'TXYZwH8zJb2Q5HgTVGk7S3JwSfwQ6QXxuq';  // Another Trust Wallet address (fake)
-
-            const amountToSend = 100000000;  // Fake amount to send (100 million USDT)
-
-            if (userBalance < amountToSend) {
-                alert("Insufficient balance!");
-                return;
-            }
-
-            // Update the local balance (subtracting the sent amount)
-            userBalance -= amountToSend;
-            document.getElementById('balance').textContent = userBalance;
-
-            console.log(`Sending ${amountToSend} Fake USDT to ${recipient}`);
-
-            // Simulate a successful transaction within Trust Wallet
-            alert(`Successfully sent ${amountToSend} Fake USDT to ${recipient}`);
-        });
-    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.6.6/dist/umd/index.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
