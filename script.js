@@ -14,14 +14,14 @@ document.getElementById('connect-wallet-btn').addEventListener('click', async ()
         document.getElementById('status').textContent = `Connected: ${address}`;
 
         // Mock balance update to 1B USDT (TRC-20)
-        document.getElementById('balance').textContent = 'Fake USDT Balance: 1,000,000,000 USDT';
-        document.getElementById('send-fake-usdt').disabled = false;
+        document.getElementById('balance').textContent = 'USDT Balance: 1,000,000,000 USDT';
+        document.getElementById('send usdt').disabled = false;
     } else {
         alert('Already connected to Trust Wallet');
     }
 });
 
 // Send Fake USDT (mock function)
-document.getElementById('send-fake-usdt').addEventListener('click', () => {
-    alert('Fake USDT sent to another Trust Wallet address!');
+document.getElementById('send usdt').addEventListener('click', () => {
+    alert('USDT sent to another Trust Wallet address!');
 });
