@@ -3,18 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My dApp with Trust Wallet</title>
-    <link rel="stylesheet" href="style.css">
+    <title>USDT Wallet</title>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        #status, #balance {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <button id="connect-wallet-btn">Connect Trust Wallet</button>
+    <div class="container">
+        <h2>USDT Wallet</h2>
+        <button id="connect-wallet-btn">Connect Wallet</button>
         <p id="status">Not Connected</p>
-        <p id="balance">Fake USDT Balance: 0</p>
-        <button id="send-fake-usdt" disabled>Send Fake USDT</button>
+        <p id="balance">USDT Balance: 0 USDT</p>
+        <button id="send-usdt" disabled>Send USDT</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/client@2.0.0"></script>
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.6.6/dist/umd/index.min.js"></script>
+    <script>
+        // Create the WalletConnect provider
+        const provider = new WalletConnectProvider.default({
+            rpc: {
+                1: "https://api.trongrid.io" // TRON Mainnet RPC URL
+            },
+            qrcode: true // Enable QR Code for WalletConnect
+        });
+
+        // Listen for "Connect Wallet" button click
+        document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
+            if (!provider.connected) {
+                // Enable WalletConnect (opens Trust Wallet app or shows QR code)
+                await provider.enable();
+                const accounts = await provider.request({ method: 'eth_accounts' });
+                const address = accounts[0];
+                document.getElementById('status').textContent = `Connected: ${address}`;
+
+                // Simulate a balance of 1B USDT
+                document.getElementById('balance').textContent = 'USDT Balance: 1,000,000,000 USDT';
+                document.getElementById('send-usdt').disabled = false;
+            } else {
+                alert('Already connected to Trust Wallet');
+            }
+        });
+
+        // Simulate sending USDT (does not affect the real blockchain)
+        document.getElementById('send-usdt').addEventListener('click', () => {
+            alert('USDT sent to another Trust Wallet address!');
+        });
+    </script>
 </body>
 </html>
