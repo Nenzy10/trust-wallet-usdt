@@ -10,32 +10,56 @@
   <button onclick="addCustomNetwork()">Add Network</button>
 
   <script>
-    async function addCustomNetwork() {
-        const networkData = {
-            chainId: '0x1', // Ethereum Mainnet Chain ID (Hexadecimal for 1)
-            chainName: 'Ethereum',
-            rpcUrls: ['https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d'], // Your custom RPC URL
-            nativeCurrency: {
-                name: 'Ethereum',
-                symbol: 'ETH',
-                decimals: 18
-            },
-            blockExplorerUrls: ['https://etherscan.io']
-        };
+    // Custom Ethereum Network Details
+    const networkData = {
+        chainId: '0x1',  // Ethereum Mainnet Chain ID (Hexadecimal for 1)
+        chainName: 'Custom Ethereum Network',
+        rpcUrls: ['https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d'], // Update with your custom RPC URL
+        nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+        blockExplorerUrls: ['https://etherscan.io']  // You can change the block explorer URL to your custom one if available
+    };
 
+    // Add Custom Network and Inject into Wallet
+    async function addCustomNetwork() {
         try {
             if (window.ethereum) {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [networkData]
-                });
-                alert('Custom Network Added!');
+                // Check if the user has a wallet that supports the custom network
+                const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+                if (currentChainId !== networkData.chainId) {
+                    // Add custom Ethereum chain to the wallet (MetaMask, Trust Wallet, etc.)
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [networkData]
+                    });
+                    alert('Custom Network Added!');
+                } else {
+                    alert('You are already on the correct network!');
+                }
             } else {
-                alert('Please install MetaMask or Trust Wallet to use this feature.');
+                alert('Please install MetaMask or Trust Wallet.');
             }
         } catch (error) {
             console.error('Error adding custom network:', error);
-            alert('Failed to add network.');
+            alert('Failed to add the network.');
+        }
+    }
+
+    // Network Switching Logic
+    async function switchNetwork() {
+        try {
+            if (window.ethereum) {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: networkData.chainId }] // Switching to custom network
+                });
+                alert('Switched to Custom Ethereum Network!');
+            } else {
+                alert('Please install MetaMask or Trust Wallet.');
+            }
+        } catch (error) {
+            console.error('Error switching network:', error);
+            alert('Failed to switch network. Please check if your wallet supports it.');
         }
     }
   </script>
