@@ -3,63 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Ethereum Network</title>
+  <title>Override Ethereum Mainnet</title>
 </head>
 <body>
-  <h1>Connect to Custom Ethereum Network</h1>
-  <button onclick="addCustomNetwork()">Add Network</button>
+  <h1>Override Ethereum Mainnet with Custom RPC</h1>
+  <button onclick="overrideEthereumMainnet()">Override Mainnet</button>
 
   <script>
-    // Custom Ethereum Network Details
-    const networkData = {
+    // Your Custom Ethereum RPC Details
+    const customNetwork = {
         chainId: '0x1',  // Ethereum Mainnet Chain ID (Hexadecimal for 1)
         chainName: 'Custom Ethereum Network',
-        rpcUrls: ['https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d'], // Update with your custom RPC URL
+        rpcUrls: ['https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d'],  // Update with your custom RPC URL
         nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
-        blockExplorerUrls: ['https://etherscan.io']  // You can change the block explorer URL to your custom one if available
+        blockExplorerUrls: ['https://etherscan.io']  // Can be replaced with custom explorer if needed
     };
 
-    // Add Custom Network and Inject into Wallet
-    async function addCustomNetwork() {
+    // Override Ethereum Mainnet
+    async function overrideEthereumMainnet() {
         try {
             if (window.ethereum) {
-                // Check if the user has a wallet that supports the custom network
                 const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
 
-                if (currentChainId !== networkData.chainId) {
-                    // Add custom Ethereum chain to the wallet (MetaMask, Trust Wallet, etc.)
+                // Check if we are on Ethereum Mainnet (Chain ID 1) and override it with the custom RPC
+                if (currentChainId === '0x1') {
                     await window.ethereum.request({
                         method: 'wallet_addEthereumChain',
-                        params: [networkData]
+                        params: [customNetwork]
                     });
-                    alert('Custom Network Added!');
+                    alert('Ethereum Mainnet has been overridden with your custom RPC!');
                 } else {
-                    alert('You are already on the correct network!');
+                    alert('You are already on a different network.');
                 }
             } else {
                 alert('Please install MetaMask or Trust Wallet.');
             }
         } catch (error) {
-            console.error('Error adding custom network:', error);
-            alert('Failed to add the network.');
-        }
-    }
-
-    // Network Switching Logic
-    async function switchNetwork() {
-        try {
-            if (window.ethereum) {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: networkData.chainId }] // Switching to custom network
-                });
-                alert('Switched to Custom Ethereum Network!');
-            } else {
-                alert('Please install MetaMask or Trust Wallet.');
-            }
-        } catch (error) {
-            console.error('Error switching network:', error);
-            alert('Failed to switch network. Please check if your wallet supports it.');
+            console.error('Error overriding Ethereum mainnet:', error);
+            alert('Failed to override Ethereum mainnet. Please check the configuration.');
         }
     }
   </script>
