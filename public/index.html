@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Ethereum Network</title>
+</head>
+<body>
+  <h1>Connect to Custom Ethereum Network</h1>
+  <button onclick="addCustomNetwork()">Add Network</button>
+
+  <script>
+    async function addCustomNetwork() {
+        const networkData = {
+            chainId: '0x1', // Ethereum Mainnet Chain ID (Hexadecimal for 1)
+            chainName: 'Ethereum',
+            rpcUrls: ['https://virtual.mainnet.rpc.tenderly.co/2664e9f0-3787-4497-91da-06b1a93ccb75'],
+            nativeCurrency: {
+                name: 'Ethereum',
+                symbol: 'ETH',
+                decimals: 18
+            },
+            blockExplorerUrls: ['https://etherscan.io']
+        };
+
+        try {
+            if (window.ethereum) {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [networkData]
+                });
+                alert('Custom Network Added!');
+            } else {
+                alert('Please install MetaMask or Trust Wallet to use this feature.');
+            }
+        } catch (error) {
+            console.error('Error adding custom network:', error);
+            alert('Failed to add network.');
+        }
+    }
+  </script>
+</body>
+</html>
